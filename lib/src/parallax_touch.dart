@@ -7,6 +7,7 @@ class Parallaxable extends StatefulWidget {
   final double angle;
   final double offsetRadio;
   final double offsetDepth;
+  final double rotateDiff;
   final Widget above;
   final Widget under;
 
@@ -14,9 +15,10 @@ class Parallaxable extends StatefulWidget {
     Key? key,
     required this.above,
     required this.under,
-    this.angle = math.pi / 8,
-    this.offsetRadio = 1.0 / 3,
-    this.offsetDepth = 10,
+    this.angle = math.pi / 9,
+    this.rotateDiff = 1.1,
+    this.offsetRadio = 1.0 / 6,
+    this.offsetDepth = 2,
   }) : super(key: key);
 
   @override
@@ -75,9 +77,9 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
                 Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
-                    ..rotateY(rotatey / 1.2)
+                    ..rotateY(rotatey / widget.rotateDiff)
                     ..translate(translatex, translatey, widget.offsetDepth)
-                    ..rotateX(rotatex),
+                    ..rotateX(rotatex / widget.rotateDiff),
                   alignment: Alignment.center,
                   child: widget.above,
                 ),

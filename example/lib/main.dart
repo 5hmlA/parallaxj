@@ -1,4 +1,6 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:parallaxj/parallaxj.dart';
 
 void main() {
@@ -78,13 +80,14 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: SizedBox(
-            width: 200,
-            height: 200,
-            child: Parallaxable(
-                under: Container(width: 200, height: 200, color: Colors.red),
-                above: Align(
-                  child: Container(width: 150, height: 150, color: Colors.blue.withAlpha(166)),
-                ))),
+          width: 200,
+          height: 400,
+          child: Parallaxable(
+            offsetRadio: 1.0 / 10,
+            under: _underBackground(),
+            above: _aboveBackground(),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -93,4 +96,34 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+
+  _underBackground() => const SizedBox(
+        width: 200,
+        height: 400,
+        child: Padding(
+          padding: EdgeInsets.only(top: 123),
+          child: ColoredBox(
+            color: Colors.redAccent,
+          ),
+        ),
+      );
+
+  _aboveBackground() => SizedBox(
+      width: 200,
+      height: 400,
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            SizedBox(
+                height: 200,
+                child: Image.asset(
+                  "images/ironman.png",
+                  fit: BoxFit.fitWidth,
+                )),
+            const Text("钢铁侠（Iron "
+                "Man）是美国漫威漫画旗下的超级英雄。有多代钢铁侠，其中最为著名的是托尼·史塔克，初次登场于《悬疑故事》第39期（1963年3月）,是斯塔克工业（STARK INDUSTRIES）的CEO")
+          ],
+        ),
+      ));
 }
