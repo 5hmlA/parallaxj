@@ -15,7 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: subosito/flutter-action@v1
-      - run: |
+      - name: flutter pub get
+        run: |
           cd example
           flutter pub get
       - name: build flutter web
@@ -23,7 +24,7 @@ jobs:
           cd example
           flutter build web --release --base-href /${{github.event.repository.name}}/
       - name: deploy github page
-      - run: |
+        run: |
           cd example/build/web
           git init
           # type configurations: your user.email and user.name followed lines 
