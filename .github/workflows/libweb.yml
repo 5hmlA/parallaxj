@@ -22,6 +22,7 @@ jobs:
         run:  |
           cd example
           flutter build web --release --base-href /${{github.event.repository.name}}/
+      - name: deploy github page
       - run: |
           cd example/build/web
           git init
@@ -31,7 +32,7 @@ jobs:
           git config --global user.email jonas.jzy@gmail.com
           git config --global user.name ZuYun
           git status
-          git remote add origin https://${{secrets.CREDENTIAL}}@github.com/${{github.repository}}.git
+          git remote add origin https://${{secrets.dev_secret}}@github.com/${{github.repository}}.git
           git checkout -b gh-pages
           git add --all
           git commit -m "update"
