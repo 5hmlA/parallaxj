@@ -1,5 +1,5 @@
 # 为library编译flutter web 同时发布为github page 网页源码分支为gh-page，通过 user.github.io/repo/可以访问
-name: flutter lib ghpage
+name: libweb
 on:
   push:
     branches:
@@ -18,9 +18,7 @@ jobs:
       - run: |
           cd example
           flutter pub get
-# 1 需要替换 repo 为项目名字 否则发布的 githubpage 无法正常加载
-      - run: flutter build web --release --base-href /${{github.event.repository.name}}/
-      - run: |
+          flutter build web --release --base-href /${{github.event.repository.name}}/
           cd build/web
           git init
           # type configurations: your user.email and user.name followed lines 
