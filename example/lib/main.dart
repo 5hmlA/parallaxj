@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:parallaxj/parallaxj.dart';
+import "dart:math";
 
 void main() {
   runApp(const MyApp());
@@ -78,16 +79,21 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
-        child: SizedBox(
-          width: 200,
-          height: 400,
-          child: Parallaxable(
-            offsetRadio: 1.0 / 10,
-            under: _underBackground(),
-            above: _aboveBackground(),
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: 200,
+              height: 400,
+              child: Parallaxable(
+                offsetRadio: 1.0 / 10,
+                under: _underBackground(),
+                above: _aboveBackground(),
+              ),
+            ),
           ),
-        ),
+          Center(child: SizedBox(width: 300, height: 300, child: Loading())),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -126,4 +132,83 @@ class _MyHomePageState extends State<MyHomePage> {
           ],
         ),
       ));
+}
+
+class Loading extends StatefulWidget {
+  const Loading({Key? key}) : super(key: key);
+
+  @override
+  State<Loading> createState() => _LoadingState();
+}
+
+class _LoadingState extends State<Loading> with SingleTickerProviderStateMixin {
+  late AnimationController _aniController;
+
+  @override
+  void initState() {
+    super.initState();
+    _aniController =
+        AnimationController(vsync: this, duration: const Duration(seconds: 4));
+    _aniController.repeat();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      color: Colors.black38,
+      child: AnimatedBuilder(
+        animation: _aniController,
+        builder: (BuildContext context, Widget? child) {
+          return CustomPaint(
+            painter: LoadingPainter(_aniController.value),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class LoadingPainter extends CustomPainter {
+  final double progress;
+  final double dosRadius = 9;
+  final double gap = 0.1;
+  final double dosNum = 6;
+  final Color dosColor = Colors.yellow;
+  late Paint _paint;
+
+  LoadingPainter(this.progress) {
+    _paint = Paint()
+      ..color = dosColor
+      ..style = PaintingStyle.fill;
+  }
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    // (x-a)^2+(y-b)^2=r^2
+    // x,y = R*cos(θ) , R*sin(θ)
+    // path of particle
+    double minSide = min(size.width, size.height);
+    double particle_radius = minSide / 2 - dosRadius;
+    for (int i = 0; i < dosNum; i++) {
+      double begin = 0.5 / (dosNum - 1) * i;
+      /// 第一个结束 最后一个才开始 耗时都是 a
+      ///
+      var interval = Interval(begin, begin + 0.5, curve: Curves.slowMiddle);
+      double angle = -pi / 2 + 2 * pi * interval.transform(progress);
+      var offset =
+          Offset(particle_radius * cos(angle), particle_radius * sin(angle));
+      canvas.drawCircle(
+          offset.translate(size.width / 2, size.height / 2), dosRadius, _paint);
+    }
+    // double angle = 2 * pi * progress;
+    // var offset =
+    //     Offset(particle_radius * cos(angle), particle_radius * sin(angle));
+    // canvas.drawCircle(
+    //     offset.translate(size.width / 2, size.height / 2), dosRadius, _paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
 }
