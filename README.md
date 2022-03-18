@@ -7,14 +7,13 @@
 https://user-images.githubusercontent.com/9412501/159013153-79af72be-30e9-4d92-b34e-7af11c772812.mp4
 
 # how to use
-[(https://img.shields.io/badge/pub-v0.0.2-green)](https://pub.dev/packages/parallaxj)
+[![pub](https://img.shields.io/badge/pub-v0.0.1-green)](https://pub.dev/packages/parallaxj)
 ```dart
 Parallaxable(
     offsetRadio: 1.0 / 10,
     under: _underBackground(),
     above: _aboveBackground(),
 )
-
 ```
 ## customization
 
