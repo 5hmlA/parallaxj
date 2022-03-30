@@ -33,13 +33,21 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
   double xpercent = 1;
   double ypercent = 1;
   final rotating = 0;
-
+  bool reverse = false;
   late AnimationController _aniController;
 
   @override
   void initState() {
     super.initState();
     _aniController = AnimationController(vsync: this, duration: const Duration(milliseconds: 100));
+    _aniController.addStatusListener((status) {
+      if(status == AnimationStatus.completed) {
+        if(reverse) {
+          reverse = false;
+          _aniController.reverse();
+        }
+      }
+    });
   }
 
   @override
@@ -86,7 +94,7 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
           if (widget.listen) {
            return Listener(
               onPointerMove: (event) => _panUpdate(event.localPosition.dx, event.localPosition.dy),
-              onPointerCancel: (event) => _panEnd(),
+              onPointerCancel: (event) => _tapUp(),
               onPointerDown: (event) => _panDown(event.localPosition.dx, event.localPosition.dy),
               onPointerUp: (event) => _tapUp(),
               child: stack,
@@ -94,8 +102,8 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
           }
 
           return GestureDetector(
-            onPanCancel: _panEnd,
-            onPanEnd: (event) => _panEnd(),
+            onPanCancel: _tapUp,
+            onPanEnd: (event) => _tapUp(),
             onPanUpdate: (event) => _panUpdate(event.localPosition.dx, event.localPosition.dy),
             onTapUp: (event) => _tapUp(),
             onPanDown: (event) => _panDown(event.localPosition.dx, event.localPosition.dy),
@@ -115,18 +123,20 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
   }
 
   void _panDown(double dx, double dy) {
-    _aniController.forward();
-    setState(() {
-      ypercent = (halfWidth - dx) / halfWidth;
-      xpercent = (dy - halfHeight) / halfHeight;
-    });
+    ypercent = (halfWidth - dx) / halfWidth;
+    xpercent = (dy - halfHeight) / halfHeight;
+    reverse = false;
+    if (_aniController.isAnimating) {
+      _aniController.stop();
+    }
+      _aniController.forward();
   }
 
   void _tapUp() {
-    _aniController.reverse();
-  }
-
-  void _panEnd() {
-    _aniController.reverse();
+    if (!_aniController.isAnimating) {
+      _aniController.reverse();
+    }else {
+      reverse = true;
+    }
   }
 }
