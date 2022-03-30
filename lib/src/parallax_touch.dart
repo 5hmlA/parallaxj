@@ -10,6 +10,7 @@ class Parallaxable extends StatefulWidget {
   final double rotateDiff;
   final Widget above;
   final Widget under;
+  final bool listen;
 
   const Parallaxable({
     Key? key,
@@ -19,6 +20,7 @@ class Parallaxable extends StatefulWidget {
     this.rotateDiff = 1.1,
     this.offsetRadio = 1.0 / 6,
     this.offsetDepth = 2,
+    this.listen = false,
   }) : super(key: key);
 
   @override
@@ -55,36 +57,49 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
         builder: (BuildContext context, Widget? child) {
           final double rotatex = widget.angle * _aniController.value * xpercent;
           final double rotatey = widget.angle * _aniController.value * ypercent;
-          final double translatex =
-              widget.offsetRadio == 0 ? 0 : _aniController.value * halfHeight * widget.offsetRadio * ypercent * -1;
+          final double translatex = widget.offsetRadio == 0
+              ? 0
+              : _aniController.value * halfHeight * widget.offsetRadio * ypercent * -1;
           // double translatex = _aniController.value * halfHeight * widget.offsetRadio * ypercent;
           final double translatey =
               widget.offsetRadio == 0 ? 0 : _aniController.value * halfWidth * widget.offsetRadio * xpercent;
-          return GestureDetector(
-            onPanEnd: _panEnd,
-            onPanUpdate: _panUpdate,
-            onTapUp: _tapUp,
-            onPanDown: _panDown,
-            child: Stack(
-              children: [
-                Transform(
-                    transform: Matrix4.identity()
-                      ..setEntry(3, 2, 0.001)
-                      ..rotateY(rotatey)
-                      ..rotateX(rotatex),
-                    alignment: Alignment.center,
-                    child: widget.under),
-                Transform(
+          final stack = Stack(
+            children: [
+              Transform(
                   transform: Matrix4.identity()
                     ..setEntry(3, 2, 0.001)
-                    ..rotateY(rotatey / widget.rotateDiff)
-                    ..translate(translatex, translatey, widget.offsetDepth)
-                    ..rotateX(rotatex / widget.rotateDiff),
+                    ..rotateY(rotatey)
+                    ..rotateX(rotatex),
                   alignment: Alignment.center,
-                  child: widget.above,
-                ),
-              ],
-            ),
+                  child: widget.under),
+              Transform(
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001)
+                  ..rotateY(rotatey / widget.rotateDiff)
+                  ..translate(translatex, translatey, widget.offsetDepth)
+                  ..rotateX(rotatex / widget.rotateDiff),
+                alignment: Alignment.center,
+                child: widget.above,
+              ),
+            ],
+          );
+          if (widget.listen) {
+           return Listener(
+              onPointerMove: (event) => _panUpdate(event.localPosition.dx, event.localPosition.dy),
+              onPointerCancel: (event) => _panEnd(),
+              onPointerDown: (event) => _panDown(event.localPosition.dx, event.localPosition.dy),
+              onPointerUp: (event) => _tapUp(),
+              child: stack,
+            );
+          }
+
+          return GestureDetector(
+            onPanCancel: _panEnd,
+            onPanEnd: (event) => _panEnd(),
+            onPanUpdate: (event) => _panUpdate(event.localPosition.dx, event.localPosition.dy),
+            onTapUp: (event) => _tapUp(),
+            onPanDown: (event) => _panDown(event.localPosition.dx, event.localPosition.dy),
+            child: stack,
           );
         },
         animation: _aniController,
@@ -92,26 +107,26 @@ class _ParallaxableState extends State<Parallaxable> with SingleTickerProviderSt
     });
   }
 
-  void _panUpdate(DragUpdateDetails details) {
+  void _panUpdate(double dx, double dy) {
     setState(() {
-      ypercent = ((halfWidth - details.localPosition.dx) / halfWidth).clamp(-1, 1);
-      xpercent = ((details.localPosition.dy - halfHeight) / halfHeight).clamp(-1, 1);
+      ypercent = ((halfWidth - dx) / halfWidth).clamp(-1, 1);
+      xpercent = ((dy - halfHeight) / halfHeight).clamp(-1, 1);
     });
   }
 
-  void _panDown(DragDownDetails details) {
+  void _panDown(double dx, double dy) {
     _aniController.forward();
     setState(() {
-      ypercent = (halfWidth - details.localPosition.dx) / halfWidth;
-      xpercent = (details.localPosition.dy - halfHeight) / halfHeight;
+      ypercent = (halfWidth - dx) / halfWidth;
+      xpercent = (dy - halfHeight) / halfHeight;
     });
   }
 
-  void _tapUp(TapUpDetails details) {
+  void _tapUp() {
     _aniController.reverse();
   }
 
-  void _panEnd(DragEndDetails details) {
+  void _panEnd() {
     _aniController.reverse();
   }
 }
